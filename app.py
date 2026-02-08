@@ -279,3 +279,31 @@ def dashboard():
 # ----------------- Run Flask -----------------
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+@app.route("/file/<int:file_id>", methods=["GET", "POST"])
+@login_required
+def open_file(file_id):
+
+    file = db.execute(
+        "SELECT * FROM files WHERE id = ? AND owner_id = ? AND type = 'file'",
+        file_id,
+        session["user_id"]
+    )
+
+    if not file:
+        return "File not found"
+
+    file = file[0]
+
+    if request.method == "POST":
+        content = request.form.get("content")
+        db.execute(
+            "UPDATE files SET content = ? WHERE id = ?",
+            content,
+            file_id
+        )
+        return redirect("/terminal")
+
+    return render_template("editor.html", file=file)

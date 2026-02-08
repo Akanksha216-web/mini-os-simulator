@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Editor{% endblock %}
+
+{% block main %}
+
+<h2>{{ file.name }}</h2>
+
+<form method="post">
+    <textarea name="content" rows="20" cols="80">
+{{ file.content }}
+    </textarea>
+    <br>
+    <button type="submit">Save</button>
+</form>
+
+{% endblock %}
