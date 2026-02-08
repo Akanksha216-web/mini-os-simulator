@@ -16,6 +16,19 @@ Session(app)
 # Connect to SQLite
 db = SQL("sqlite:///mini_os.db")
 
+def delete_recursive(file_id):
+    # Get children
+    children = db.execute(
+        "SELECT id FROM files WHERE parent_id = ?",
+        file_id
+    )
+
+    for child in children:
+        delete_recursive(child["id"])
+
+    db.execute("DELETE FROM files WHERE id = ?", file_id)
+
+
 # ----------------- Password helpers -----------------
 def hash_password(password):
     """Return SHA-256 hash of the password"""
@@ -39,13 +52,13 @@ def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        confirm = request.form.get("confirm")
+        confirmation = request.form.get("confirmation")
 
-        if not username or not password or not confirm:
+        if not username or not password or not confirmation:
             flash("All fields are required!")
             return redirect("/register")
 
-        if password != confirm:
+        if password != confirmation:
             flash("Passwords do not match!")
             return redirect("/register")
 
@@ -103,67 +116,156 @@ def logout():
 @app.route("/terminal", methods=["GET", "POST"])
 @login_required
 def terminal():
-    """Terminal interface"""
     output = ""
-    current_dir_id = session.get("current_dir_id")  # track current folder
-    if current_dir_id is None:
-        current_dir_id = None  # root directory
 
     if request.method == "POST":
-        command_input = request.form.get("command").strip()
-        parts = command_input.split()
-        cmd = parts[0].lower()
-        args = parts[1:]
+        command = request.form.get("command").strip()
+        parts = command.split()
 
+        if len(parts) == 0:
+            return render_template("terminal.html", output="")
+
+        cmd = parts[0]
+
+        # ---------------- LS ----------------
         if cmd == "ls":
-            # list files in current directory
-            rows = db.execute(
-                "SELECT name, type FROM files WHERE parent_id IS ? AND owner_id = ?",
-                current_dir_id, session["user_id"]
+            items = db.execute(
+                "SELECT name, type FROM files WHERE owner_id = ? AND parent_id IS ? ORDER BY type DESC, name ASC",
+                session["user_id"],
+                session.get("cwd")
             )
-            output = "\n".join(f"{r['name']}/" if r["type"]=="folder" else r["name"] for r in rows)
 
-        elif cmd == "mkdir":
-            if len(args) != 1:
-                output = "Usage: mkdir <folder_name>"
-            else:
-                folder_name = args[0]
-                # check if folder already exists
-                exists = db.execute(
-                    "SELECT * FROM files WHERE name=? AND parent_id IS ? AND owner_id=? AND type='folder'",
-                    folder_name, current_dir_id, session["user_id"]
-                )
-                if exists:
-                    output = "Folder already exists"
+            for item in items:
+                if item["type"] == "folder":
+                    output += item["name"] + "/\n"
                 else:
-                    db.execute(
-                        "INSERT INTO files (name, type, parent_id, owner_id) VALUES (?, 'folder', ?, ?)",
-                        folder_name, current_dir_id, session["user_id"]
-                    )
-                    output = f"Folder '{folder_name}' created"
+                    output += item["name"] + "\n"
 
-        elif cmd == "touch":
-            if len(args) != 1:
-                output = "Usage: touch <file_name>"
+        # ---------------- MKDIR ----------------
+        elif cmd == "mkdir" and len(parts) == 2:
+            name = parts[1]
+
+            existing = db.execute(
+                "SELECT id FROM files WHERE owner_id = ? AND parent_id IS ? AND name = ?",
+                session["user_id"],
+                session.get("cwd"),
+                name
+            )
+
+            if existing:
+                output = "Folder already exists"
             else:
-                file_name = args[0]
-                exists = db.execute(
-                    "SELECT * FROM files WHERE name=? AND parent_id IS ? AND owner_id=? AND type='file'",
-                    file_name, current_dir_id, session["user_id"]
+                db.execute(
+                    "INSERT INTO files (name, type, parent_id, owner_id) VALUES (?, 'folder', ?, ?)",
+                    name,
+                    session.get("cwd"),
+                    session["user_id"]
                 )
-                if exists:
-                    output = "File already exists"
+                output = f"Folder '{name}' created"
+
+        # ---------------- TOUCH ----------------
+        elif cmd == "touch" and len(parts) == 2:
+            name = parts[1]
+
+            existing = db.execute(
+                "SELECT id FROM files WHERE owner_id = ? AND parent_id IS ? AND name = ?",
+                session["user_id"],
+                session.get("cwd"),
+                name
+            )
+
+            if existing:
+                output = "File already exists"
+            else:
+                db.execute(
+                    "INSERT INTO files (name, type, parent_id, owner_id, content) VALUES (?, 'file', ?, ?, '')",
+                    name,
+                    session.get("cwd"),
+                    session["user_id"]
+                )
+                output = f"File '{name}' created"
+
+        # ---------------- CD ----------------
+        elif cmd == "cd" and len(parts) == 2:
+            target = parts[1]
+
+            if target == "/":
+                session["cwd"] = None
+                output = "Moved to root"
+
+            elif target == "..":
+                if session.get("cwd") is None:
+                    output = "Already at root"
                 else:
-                    db.execute(
-                        "INSERT INTO files (name, type, parent_id, owner_id, content) VALUES (?, 'file', ?, ?, '')",
-                        file_name, current_dir_id, session["user_id"]
+                    parent = db.execute(
+                        "SELECT parent_id FROM files WHERE id = ?",
+                        session["cwd"]
                     )
-                    output = f"File '{file_name}' created"
+                    session["cwd"] = parent[0]["parent_id"]
+                    output = "Moved up"
+
+            else:
+                folder = db.execute(
+                    "SELECT id FROM files WHERE owner_id = ? AND parent_id IS ? AND name = ? AND type = 'folder'",
+                    session["user_id"],
+                    session.get("cwd"),
+                    target
+                )
+
+                if not folder:
+                    output = "Folder not found"
+                else:
+                    session["cwd"] = folder[0]["id"]
+                    output = f"Entered '{target}'"
+
+        # ---------------- PWD ----------------
+        elif cmd == "pwd":
+            current = session.get("cwd")
+
+            if current is None:
+                output = "/"
+            else:
+                path = []
+                while current is not None:
+                    row = db.execute(
+                        "SELECT name, parent_id FROM files WHERE id = ?",
+                        current
+                    )[0]
+
+                    path.append(row["name"])
+                    current = row["parent_id"]
+
+                path.reverse()
+                output = "/" + "/".join(path)
+
+        # ---------------- RM ----------------
+        elif cmd == "rm" and len(parts) == 2:
+            name = parts[1]
+
+            target = db.execute(
+                "SELECT id FROM files WHERE owner_id = ? AND parent_id IS ? AND name = ?",
+                session["user_id"],
+                session.get("cwd"),
+                name
+            )
+
+            if not target:
+                output = "File or folder not found"
+            else:
+                delete_recursive(target[0]["id"])
+                output = f"'{name}' deleted"
 
         else:
-            output = f"Unknown command: {cmd}"
+            output = "Unknown or invalid command"
 
-    return render_template("terminal.html", output=output)
+    items = db.execute(
+    "SELECT id, name, type FROM files WHERE owner_id = ? AND parent_id IS ? ORDER BY type DESC, name ASC",
+    session["user_id"],
+    session.get("cwd")
+)
+
+    return render_template("terminal.html", output=output, items=items)
+
 
 
 @app.route("/dashboard")
