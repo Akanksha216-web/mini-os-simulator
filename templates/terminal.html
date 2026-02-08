@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+
+Terminal
+
+{% endblock %}
+
+{% block main %}
+
+<h1>Terminal</h1>
+<form method="post">
+    <input type="text" name="command" autofocus autocomplete="off" placeholder="Enter command">
+    <button type="submit">Run</button>
+</form>
+
+<pre>{{ output }}</pre>
+
+{% endblock %}

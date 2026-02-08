@@ -1,0 +1,25 @@
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    hash TEXT NOT NULL,
+    role TEXT DEFAULT 'user'
+);
+
+CREATE TABLE files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL, -- file or folder
+    content TEXT,
+    parent_id INTEGER,
+    owner_id INTEGER,
+    FOREIGN KEY(owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE processes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    command TEXT NOT NULL,
+    owner_id INTEGER,
+    start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status TEXT DEFAULT 'running',
+    FOREIGN KEY(owner_id) REFERENCES users(id)
+);
