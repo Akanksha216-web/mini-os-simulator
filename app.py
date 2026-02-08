@@ -276,10 +276,21 @@ def dashboard():
     return render_template("dashboard.html")
 
 
-# ----------------- Run Flask -----------------
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route("/folder/<int:folder_id>")
+@login_required
+def open_folder(folder_id):
 
+    folder = db.execute(
+        "SELECT id FROM files WHERE id = ? AND owner_id = ? AND type = 'folder'",
+        folder_id,
+        session["user_id"]
+    )
+
+    if not folder:
+        return "Folder not found", 404
+
+    session["cwd"] = folder_id
+    return redirect("/terminal")
 
 
 @app.route("/file/<int:file_id>", methods=["GET", "POST"])
@@ -307,3 +318,8 @@ def open_file(file_id):
         return redirect("/terminal")
 
     return render_template("editor.html", file=file)
+
+
+# ----------------- Run Flask -----------------
+if __name__ == "__main__":
+    app.run(debug=True)
