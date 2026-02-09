@@ -1,14 +1,13 @@
 {% extends "layout.html" %}
 
 {% block title %}
-
 Terminal
-
 {% endblock %}
 
 {% block main %}
 
-<h3>Command line</h3>
+<h3>home{{ current_path }}</h3>
+
 <form method="post">
     <input type="text" name="command" autofocus autocomplete="off" placeholder="Enter command">
     <button type="submit">Run</button>
@@ -21,20 +20,23 @@ Terminal
     <div class="icon">
 
         {% if item.type == "file" %}
-    <a href="{{ url_for('open_file', file_id=item.id) }}">
-        <div class="file-icon">📄</div>
-    </a>
-{% else %}
-    <a href="{{ url_for('open_folder', folder_id=item.id) }}">
-        <div class="folder-icon">📁</div>
-    </a>
-{% endif %}
+            <a href="{{ url_for('open_file', file_id=item.id) }}">
+                <div class="file-icon">📄</div>
+            </a>
+        {% else %}
+            <a href="{{ url_for('open_folder', folder_id=item.id) }}">
+                <div class="folder-icon">📁</div>
+            </a>
+        {% endif %}
 
         <div class="label">{{ item.name }}</div>
 
     </div>
-{% endfor %}
-<pre class="terminal-output">{{ output }}</pre>
+    {% endfor %}
 </div>
+
+{% if output %}
+<pre class="terminal-output">{{ output }}</pre>
+{% endif %}
 
 {% endblock %}
