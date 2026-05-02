@@ -3,6 +3,8 @@
     flex-wrap: wrap;
     gap: 20px;
     margin-top: 20px;
+    background-image: url(/static/images/desktop_background.jpg);
+    
 }
 
 .icon {

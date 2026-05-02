@@ -3,10 +3,10 @@
     <head></head>
     <title>Inside File</title>
 <body>
-<h1>EDITOR PAGE</h1>
-<p>{{ file.name }}</p>
+<h3>EDITOR PAGE</h3>
+<p class = "path">{{ file.name }}</p>
 
-<form method="post">
+<form method="post" class = "editor-form">
     <textarea name="content" rows="10" cols="50">{{ file.content }}</textarea>
     <br>
     <button type="submit">Save</button>

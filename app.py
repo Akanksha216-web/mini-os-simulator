@@ -56,8 +56,6 @@ def build_path():
     return "/" + "/".join(path)
 
 
-# ----------------- Routes -----------------
-
 @app.route("/")
 def index():
     return redirect("/login")

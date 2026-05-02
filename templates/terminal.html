@@ -6,9 +6,9 @@ Terminal
 
 {% block main %}
 
-<h3>home{{ current_path }}</h3>
+<p>home{{ current_path }}</p>
 
-<form method="post">
+<form method="post" class = "command-line">
     <input type="text" name="command" autofocus autocomplete="off" placeholder="Enter command">
     <button type="submit">Run</button>
 </form>
