@@ -1,0 +1,33 @@
+Mini OS Simulator
+
+Video Demo: <INSERT VIDEO URL HERE>
+
+Description:
+
+Mini OS Simulator is a web-based operating system simulation built using Python, Flask, SQLite, HTML, CSS, and Bootstrap. The goal of this project was to create a simplified operating system environment that allows users to interact with a virtual file system through both terminal-style commands and a graphical desktop interface. Users can register, log in, create folders and files, navigate directories, edit file contents, and manage their own isolated virtual workspace.
+
+The inspiration for this project came from the desire to better understand how operating systems organize files and directories. While modern operating systems provide highly sophisticated file management systems, their underlying concepts can be difficult for beginners to visualize. This project attempts to simplify those ideas while still providing a realistic user experience. Instead of interacting with the real computer's file system, users work within a virtual file system stored entirely inside a SQLite database.
+
+One of the main objectives of the project was to combine concepts from several areas of computer science that were covered throughout CS50. These concepts include web development with Flask, database design using SQLite, user authentication, session management, hierarchical data structures, recursion, and front-end development using HTML and CSS.
+
+The central component of the project is the virtual file system. Files and folders are stored in a database table called "files". Each entry contains information such as its name, type, owner, parent directory, and file contents. The "parent_id" field allows folders to contain other folders and files, creating a tree-like structure similar to that used in real operating systems. Rather than creating actual folders on the computer, the application reconstructs the directory hierarchy using database relationships.
+
+Users interact with the system through a terminal interface. Several commands are supported, including "ls", "mkdir", "touch", "cd", and "rm". The "ls" command displays the contents of the current directory. The "mkdir" command creates a new folder. The "touch" command creates a new file. The "cd" command allows users to move between directories, while "rm" removes files or folders. Together, these commands simulate the basic functionality available in many command-line operating systems.
+
+In addition to terminal commands, the project includes a desktop-style graphical interface. Files and folders are displayed as icons that can be clicked to perform actions. Clicking a folder navigates into that directory, while clicking a file opens a simple text editor. This dual-interface approach was chosen because it makes the project more intuitive and visually engaging while still preserving the educational value of command-line interaction.
+
+The file editor allows users to open files and modify their contents. When a file is saved, its contents are stored directly in the database. This feature transforms files from simple placeholders into meaningful objects capable of storing information. Because file contents are persisted in the database, users can close the application, return later, and continue working with the same files.
+
+User authentication is another important part of the project. New users can register an account, while existing users can log in securely. Passwords are not stored as plain text. Instead, they are hashed using the SHA-256 hashing algorithm before being saved to the database. During login, entered passwords are hashed again and compared with the stored value. This approach provides a basic level of security and demonstrates an important real-world software development practice.
+
+Session management is implemented using Flask-Session. When users log in successfully, session variables store information such as the user's ID and current working directory. This allows the application to maintain state across requests and ensure that each user sees only their own files and folders. Every file and folder is associated with an owner, preventing users from accessing data that belongs to others.
+
+The project consists of several files, each serving a specific purpose. "app.py" contains the main application logic, route definitions, command processing, and database interactions. "helpers.py" contains utility functions, including the login protection decorator used throughout the application. "schema.sql" defines the database structure, including tables for users, files, and processes. "init_db.py" initializes the database by executing the schema file. The HTML templates define the user interface, including login, registration, terminal, editor, and layout pages. The CSS files are responsible for styling and visual presentation.
+
+One design decision I spent time considering was how to represent the file system. Initially, I explored using Python classes such as "Directory" and "File" to store data in memory. While this approach worked for simple testing, it lacked persistence because data would disappear when the application stopped running. I ultimately chose a database-driven design because it more closely resembles how real systems manage persistent data and allows users to retain their files between sessions.
+
+Another design choice involved supporting both terminal commands and graphical navigation. While either approach could have worked independently, combining both provided a more complete experience. Users who prefer command-line interaction can work entirely through commands, while users who prefer visual navigation can interact with icons and clickable folders.
+
+Although the project currently focuses on file management, the database schema also includes a "processes" table intended for future expansion. This would allow the simulator to model process creation, execution, and scheduling concepts commonly found in operating systems. Including this structure makes the project extensible and provides opportunities for future development.
+
+Overall, Mini OS Simulator combines concepts from databases, web development, authentication, and operating systems into a single application. Building it helped me gain a deeper understanding of how file systems are organized, how web applications maintain user state, and how persistent storage can be used to represent complex hierarchical structures. The project serves as both a learning tool and a practical demonstration of several core computer science concepts covered throughout CS50.

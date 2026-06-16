@@ -3,10 +3,15 @@
     flex-wrap: wrap;
     gap: 20px;
     margin-top: 20px;
-    background-image: url(/static/images/desktop_background.jpg);
-    
 }
-
+body{
+    background-image: url(/static/images/back.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
+}
 .icon {
     width: 100px;
     text-align: center;
@@ -21,4 +26,9 @@
     margin-top: 5px;
     font-size: 14px;
     word-wrap: break-word;
+    color: aliceblue;
+}
+
+p{
+    color:aliceblue
 }
