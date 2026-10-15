@@ -92,7 +92,7 @@ def register():
         session["role"] = "user"
         session["cwd"] = None
 
-        return redirect("/terminal")
+        return redirect("/login")
 
     return render_template("register.html")
 
