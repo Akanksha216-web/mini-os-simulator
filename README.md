@@ -18,16 +18,81 @@ In addition to terminal commands, the project includes a desktop-style graphical
 
 The file editor allows users to open files and modify their contents. When a file is saved, its contents are stored directly in the database. This feature transforms files from simple placeholders into meaningful objects capable of storing information. Because file contents are persisted in the database, users can close the application, return later, and continue working with the same files.
 
-User authentication is another important part of the project. New users can register an account, while existing users can log in securely. Passwords are not stored as plain text. Instead, they are hashed using the SHA-256 hashing algorithm before being saved to the database. During login, entered passwords are hashed again and compared with the stored value. This approach provides a basic level of security and demonstrates an important real-world software development practice.
+User authentication is another important part of the project. New users can register an account, while existing users can log in using their credentials. Passwords are not stored as plain text. Instead, the application uses the SHA-256 hashing algorithm to transform passwords into hash values before storing them in the database. During login, the entered password is hashed again and compared with the stored hash. Although this demonstrates the concept of password hashing, SHA-256 alone is not recommended for production password storage because it is not designed to resist password-guessing attacks. A dedicated password-hashing algorithm, such as scrypt or Argon2, would be more appropriate for a production application.
 
-Session management is implemented using Flask-Session. When users log in successfully, session variables store information such as the user's ID and current working directory. This allows the application to maintain state across requests and ensure that each user sees only their own files and folders. Every file and folder is associated with an owner, preventing users from accessing data that belongs to others.
+Session management is implemented using Flask-Session. When users log in successfully, session variables store information such as the user's ID and current working directory. This allows the application to maintain state across requests and provide each user with an individual virtual workspace. File and folder queries use ownership information to restrict access to the current user's data.
 
-The project consists of several files, each serving a specific purpose. "app.py" contains the main application logic, route definitions, command processing, and database interactions. "helpers.py" contains utility functions, including the login protection decorator used throughout the application. "schema.sql" defines the database structure, including tables for users, files, and processes. "init_db.py" initializes the database by executing the schema file. The HTML templates define the user interface, including login, registration, terminal, editor, and layout pages. The CSS files are responsible for styling and visual presentation.
+## Project Structure
 
-One design decision I spent time considering was how to represent the file system. Initially, I explored using Python classes such as "Directory" and "File" to store data in memory. While this approach worked for simple testing, it lacked persistence because data would disappear when the application stopped running. I ultimately chose a database-driven design because it more closely resembles how real systems manage persistent data and allows users to retain their files between sessions.
+The project consists of several files, each serving a specific purpose:
 
-Another design choice involved supporting both terminal commands and graphical navigation. While either approach could have worked independently, combining both provided a more complete experience. Users who prefer command-line interaction can work entirely through commands, while users who prefer visual navigation can interact with icons and clickable folders.
+- **`app.py`**: Contains the main Flask application, route definitions, terminal command processing, file and folder management, and database interactions.
+- **`helpers.py`**: Contains utility functions, including the `login_required` decorator, which restricts access to routes that require authentication.
+- **`schema.sql`**: Defines the database schema used to store user accounts, files, folders, and other application data.
+- **`init_db.py`**: Initializes the SQLite database by executing the SQL statements in `schema.sql`.
+- **`requirements.txt`**: Lists the Python packages required to run the application.
+- **`templates/`**: Contains the HTML templates used to render the login page, registration page, terminal, file editor, and other interface components.
+- **`static/`**: Contains static resources, including CSS stylesheets and other front-end assets.
 
-Although the project currently focuses on file management, the database schema also includes a "processes" table intended for future expansion. This would allow the simulator to model process creation, execution, and scheduling concepts commonly found in operating systems. Including this structure makes the project extensible and provides opportunities for future development.
+## Design Decisions
 
-Overall, Mini OS Simulator combines concepts from databases, web development, authentication, and operating systems into a single application. Building it helped me gain a deeper understanding of how file systems are organized, how web applications maintain user state, and how persistent storage can be used to represent complex hierarchical structures. The project serves as both a learning tool and a practical demonstration of several core computer science concepts covered throughout CS50.
+One design decision I spent time considering was how to represent the file system. Initially, I explored using Python classes such as `Directory` and `File` to store data in memory. While this approach worked for simple testing, it lacked persistence because data would disappear when the application stopped running. I ultimately chose a database-driven design because it provides persistent storage and allows users to retain their files between sessions.
+
+Another design choice involved supporting both terminal commands and graphical navigation. While either approach could have worked independently, combining both provided a more complete experience. Users who prefer command-line interaction can manage their files through commands, while users who prefer visual navigation can interact with icons and clickable folders.
+
+## Installation and Usage
+
+### Prerequisites
+
+- Python 3
+- pip
+
+### Setup Instructions
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Akanksha216-web/mini-os-simulator.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd mini-os-simulator
+   ```
+
+3. Install the required dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Initialize the database:
+
+   ```bash
+   python init_db.py
+   ```
+
+   **Note:** Run this command when setting up a fresh database. Check `schema.sql` before rerunning it if you already have data you want to preserve.
+
+5. Start the application:
+
+   ```bash
+   python app.py
+   ```
+
+6. Open your browser and visit:
+
+   `http://127.0.0.1:5000`
+
+7. Register an account or log in to begin using the virtual file system.
+
+## Limitations
+
+Mini OS Simulator is an educational simulation rather than a real operating system. Files and folders are stored in an SQLite database instead of the host computer's actual file system. The terminal supports a limited set of predefined commands and does not execute arbitrary operating system commands.
+
+The application demonstrates fundamental concepts in operating systems, database management, web development, and user authentication. It is not intended for production use.
+
+## Conclusion
+
+Building Mini OS Simulator helped me develop a deeper understanding of file system organization, hierarchical data structures, database persistence, and session management in web applications. By combining terminal-style commands with graphical navigation, the project provides an interactive way to explore fundamental operating system concepts while applying the programming and problem-solving skills developed throughout CS50.

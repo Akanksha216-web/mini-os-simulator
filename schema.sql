@@ -14,12 +14,3 @@ CREATE TABLE files (
     owner_id INTEGER,
     FOREIGN KEY(owner_id) REFERENCES users(id)
 );
-
-CREATE TABLE processes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    command TEXT NOT NULL,
-    owner_id INTEGER,
-    start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status TEXT DEFAULT 'running',
-    FOREIGN KEY(owner_id) REFERENCES users(id)
-);
