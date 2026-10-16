@@ -1,6 +1,6 @@
 Mini OS Simulator
 
-Video Demo: <INSERT VIDEO URL HERE>
+Video Demo: https://youtu.be/xmib6fsiW1U
 
 Description:
 
