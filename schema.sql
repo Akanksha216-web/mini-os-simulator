@@ -8,7 +8,7 @@ CREATE TABLE users (
 CREATE TABLE files (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    type TEXT NOT NULL, -- file or folder
+    type TEXT NOT NULL, 
     content TEXT,
     parent_id INTEGER,
     owner_id INTEGER,

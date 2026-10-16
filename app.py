@@ -5,7 +5,7 @@ from flask_session import Session
 from cs50 import SQL
 from helpers import login_required
 
-# ----------------- Flask setup -----------------
+
 app = Flask(__name__)
 
 app.config["SESSION_PERMANENT"] = False
@@ -14,7 +14,7 @@ Session(app)
 
 db = SQL("sqlite:///mini_os.db")
 
-# ----------------- Utility Functions -----------------
+
 
 def delete_recursive(file_id):
     children = db.execute(
@@ -138,7 +138,7 @@ def terminal():
         if parts:
             cmd = parts[0]
 
-            # -------- LS --------
+            
             if cmd == "ls":
                 items_ls = db.execute(
                     "SELECT name, type FROM files WHERE owner_id = ? AND parent_id IS ? ORDER BY type DESC, name ASC",
@@ -152,7 +152,7 @@ def terminal():
                     else:
                         output += item["name"] + "\n"
 
-            # -------- MKDIR --------
+            
             elif cmd == "mkdir" and len(parts) == 2:
                 name = parts[1]
 
@@ -171,7 +171,7 @@ def terminal():
                         session["user_id"]
                     )
 
-            # -------- TOUCH --------
+            
             elif cmd == "touch" and len(parts) == 2:
                 name = parts[1]
 
@@ -190,7 +190,7 @@ def terminal():
                         session["user_id"]
                     )
 
-            # -------- CD --------
+            
             elif cmd == "cd" and len(parts) == 2:
                 target = parts[1]
 
@@ -218,7 +218,7 @@ def terminal():
                     else:
                         output = "Folder not found"
 
-            # -------- RM --------
+            
             elif cmd == "rm" and len(parts) == 2:
                 name = parts[1]
 
